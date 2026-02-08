@@ -67,7 +67,25 @@ docker compose down
 **3** Workers claim a job according to the dwell time in the queue (FIFO), and process tasks according to the jobs imported from the queue. worker outputs to /output, and moves the original file from /input to /input/completed.
 
 
+## Project Status
 
+### Working
+- Producer scans input directory and enqueues jobs to Redis
+- Worker polls Redis queue and processes jobs
+- Basic image transformation (resize to 256x256, convert to grayscale)
+- JSON-based job configuration
+
+### In Progress
+- Error handling and recovery
+- Logging and monitoring
+- Graceful shutdown
+
+### Planned
+- Docker containerization
+- Horizontal worker scaling
+- Job status tracking
+- Metrics dashboard
+- Dead letter queue for failed jobs
 
 
 
