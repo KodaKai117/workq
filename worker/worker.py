@@ -11,8 +11,8 @@ def redissetup():
        print ("connected to redis")
        return r
        
-   except:
-       print ("can't connect to redis. Is it running?")
+   except Exception as e:
+       print (f"can't connect to redis. Is it running? error: {e}")
 
 r = redissetup()
 
