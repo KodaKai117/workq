@@ -17,13 +17,10 @@ for file in input_dir.iterdir():
         job["input_path"] = str(file)
         job["output_path"] = str(Path(job["output_path"]) / file.name)
         job["time_enqueued"] = str(time.time())
-        r.lpush("jobs", json.dumps(job))
-        print(f"pushed {file} to the queue")
-        """try:
-           r.lpush(json.dumps(job))
-           print(f"pushed {Path(file)} to the queue")
-        except:
-           print(f"unable to push {Path(file)} to the queue. Is the Redis Queue running?")"""
-
-
+        try:
+           r.lpush("jobs", json.dumps(job))
+           print(f"pushed {file} to the queue")
+        except Exception as e:
+           print(f"unable to push {Path(file)} to the queue. Is the Redis Queue running?{e}")
+        
 
