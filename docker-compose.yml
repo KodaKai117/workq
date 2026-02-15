@@ -1,0 +1,28 @@
+services:
+
+  redis_queue:
+    image: redis:alpine
+    container_name: redis_queue
+    ports: 
+      - "6379:6379"
+
+  producer:
+    build: ./producer 
+    container_name: producer
+    volumes:
+      - ./interface:/app/interface  
+    environment:
+      - REDIS_HOST=redis_queue
+    depends_on:
+      - redis_queue
+
+  worker:
+    build: ./worker
+    volumes:
+      - ./interface:/app/interface 
+    environment:
+      - REDIS_HOST=redis_queue
+    depends_on:
+      - redis_queue
+    deploy:
+      replicas: 3

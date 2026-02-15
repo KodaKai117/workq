@@ -1,11 +1,13 @@
 import redis
 import json
+import os
 from pathlib import Path
 import time
 from tasks.transform import process_image
 
 def redissetup():
-   r = redis.Redis(host='localhost', port=6379, decode_responses = True)
+   redis_host = os.getenv('REDIS_HOST', 'localhost')                                                             # connect worker to redis
+   r = redis.Redis(host=redis_host, port=6379, decode_responses = True)
    try:
        r.ping()
        print ("connected to redis")
@@ -16,8 +18,8 @@ def redissetup():
 
 r = redissetup()
 
-def getajob() -> dict:
-   result = r.brpop("jobs", timeout=5)
+def getajob(redis_client) -> dict:
+   result = redis_client.brpop("jobs", timeout=5)
 
    if result:
             job = json.loads(result[1])
@@ -27,16 +29,14 @@ def getajob() -> dict:
       print ("waiting.. no jobs available..")
       
    
-redissetup()
-   
 while True:
-   job = getajob()
+   job = getajob(r)
    if job:
       try:
          process_image(job)
-         print(f"Processed {Path(job["input_path"]).name}")
+         print(f"Processed {Path(job['input_path']).name}")
       except Exception as e:
-         print(f"Failed to process {job.get("input_path")}: {e}")
+         print(f"Failed to process {job.get('input_path')}: {e}")
          
    else:
        time.sleep(1)
