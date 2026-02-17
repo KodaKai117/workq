@@ -35,9 +35,8 @@ def generate_jobs(tasks: dict, redis_client)-> int:
       print ("no tasks configured")
       return 0
    
-   processed_dir = Path(__file__).parent / "interface" / "input" / "processed"
-   processed_dir.mkdir(parents=True, exist_ok=True)
-       
+   ready_dir = Path(__file__).parent / "interface" / "input" / "ready"
+   ready_dir.mkdir(parents=True, exist_ok=True)
 
    for task_name, task_config in tasks.items():
       input_dir = Path(task_config["input_path"])
@@ -54,15 +53,16 @@ def generate_jobs(tasks: dict, redis_client)-> int:
          if not file.is_file():
              continue
          
+
          job = task_config.copy()
-         job["input_path"] = str(file)
+         job["input_path"] = str(ready_dir / file.name)
          job["output_path"] = str(Path(job["output_path"]) / file.name)
          job["time_enqueued"] = time.time()
 
          try:
+            file.rename (ready_dir / file.name)
             redis_client.lpush("jobs", json.dumps(job))
             print(f"enqueued {file.name}")
-            file.rename (processed_dir / file.name)
             jobs_enqueued += 1
 
          except Exception as e:
